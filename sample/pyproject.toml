@@ -1,0 +1,35 @@
+[project]
+name = "sample"
+version = "0.1.0"
+description = "Add your description here"
+dependencies = [
+    "pyaudio==0.2.13",
+    "websockets>=10.0",
+    "soundfile>=0.13.0",
+    "numpy>=2.2.1",
+    "six>=1.16.0",
+    "google>=3.0.0",
+    "gcloud>=0.18.3",
+    "google-auth>=2.37.0",
+    "grpc-google-cloud-speech-v1beta1>=1.0.1",
+    "google-cloud-speech==2.19.0",
+    "protobuf==3.20.3",
+    "fastapi>=0.115.6",
+    "uvicorn>=0.34.0",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sample"]
