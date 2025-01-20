@@ -2,7 +2,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import base64
-from google.cloud import speech
+from google.cloud import speech, texttospeech
 import uvicorn
 import signal
 import sys
@@ -44,12 +44,37 @@ def create_streaming_config():
         config=config, interim_results=True
     )
 
+def text_to_speech(text: str) -> bytes:
+    """テキストを音声に変換する"""
+    client = texttospeech.TextToSpeechClient()
+    
+    synthesis_input = texttospeech.SynthesisInput(text=text)
+    
+    voice = texttospeech.VoiceSelectionParams(
+        language_code="ja-JP",
+        name="ja-JP-Standard-C",  # 音声の種類を選択
+        ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+    )
+    
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.LINEAR16,
+        sample_rate_hertz=SAMPLE_RATE
+    )
+    
+    response = client.synthesize_speech(
+        input=synthesis_input,
+        voice=voice,
+        audio_config=audio_config
+    )
+    
+    return response.audio_content
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("Connection opened")
 
-    client = speech.SpeechClient()
+    speech_client = speech.SpeechClient()
     streaming_config = create_streaming_config()
     audio_buffer = AudioBuffer()
 
@@ -61,19 +86,39 @@ async def websocket_endpoint(websocket: WebSocket):
                     for content in audio_buffer.get_data()
                 )
                 try:
-                    responses = client.streaming_recognize(streaming_config, requests)
+                    responses = speech_client.streaming_recognize(streaming_config, requests)
                     for response in responses:
                         if not response.results:
                             continue
                         result = response.results[0]
                         if not result.alternatives:
                             continue
+                        
                         transcript = result.alternatives[0].transcript
+                        is_final = result.is_final
+                        
                         print(f"Recognized: {transcript}")
-                        await websocket.send_json({
-                            "transcript": transcript,
-                            "is_final": result.is_final
-                        })
+                        
+                        # 最終結果の場合のみ音声合成を実行
+                        if is_final:
+                            try:
+                                audio_response = text_to_speech(transcript)
+                                audio_base64 = base64.b64encode(audio_response).decode('utf-8')
+                                
+                                await websocket.send_json({
+                                    "transcript": transcript,
+                                    "is_final": is_final,
+                                    "audio": audio_base64
+                                })
+                            except Exception as e:
+                                print(f"Text-to-speech error: {e}")
+                        else:
+                            # 中間結果は従来通りテキストのみ送信
+                            await websocket.send_json({
+                                "transcript": transcript,
+                                "is_final": is_final
+                            })
+                            
                 except Exception as e:
                     print(f"Recognition error: {e}")
             await asyncio.sleep(0.1)
