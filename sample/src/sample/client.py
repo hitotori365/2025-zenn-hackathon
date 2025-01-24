@@ -76,7 +76,11 @@ class AudioClient:
                         # 音声データの読み取りと送信
                         audio_data = self.input_stream.read(CHUNK_SIZE, exception_on_overflow=False)
                         if audio_data:
+                            print(f"\nSending audio data length: {len(audio_data)}")
+                            print(f"First 10 bytes of audio data: {audio_data[:10]}")
                             audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                            print(f"Base64 encoded length: {len(audio_base64)}")
+                            print(f"First 100 chars of base64: {audio_base64[:100]}")
                             await websocket.send(audio_base64)
 
                         # サーバーからのレスポンスを受信

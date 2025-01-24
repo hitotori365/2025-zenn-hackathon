@@ -129,12 +129,22 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             try:
                 data = await websocket.receive_text()
-                audio_data = base64.b64decode(data)
-                audio_buffer.add_data(audio_data)
+                # ログ追加: 受信データの詳細を表示
+                print(f"\nReceived data length: {len(data)}")
+                print(f"First 100 chars of data: {data[:100]}")
+                
+                try:
+                    audio_data = base64.b64decode(data)
+                    print(f"Decoded audio data length: {len(audio_data)}")
+                    print(f"Audio data first 10 bytes: {audio_data[:10]}")
+                    audio_buffer.add_data(audio_data)
+                except Exception as e:
+                    print(f"Error decoding base64 data: {e}")
+                    
             except Exception as e:
                 print(f"Error receiving data: {e}")
+                print(f"Error type: {type(e)}")
                 break
-
     except Exception as e:
         print(f"Connection error: {e}")
     finally:
