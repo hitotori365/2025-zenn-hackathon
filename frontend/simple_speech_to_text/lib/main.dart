@@ -44,6 +44,7 @@ class SpeechToTextScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: Container(
+                width: double.infinity,
                 padding: EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
