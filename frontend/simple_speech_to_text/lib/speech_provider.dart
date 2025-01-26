@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -65,6 +67,23 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
       isListening: false,
     );
     print("stop listening.");
+
+    if (state.text.isNotEmpty) {
+      // テキストが入力されていればメッセージに追加
+      print("add text");
+      addLists(state.text);
+    }
+  }
+
+  void addLists(String text) {
+    print(text);
+    List<String> messages = state.messages;
+    messages.add(text);
+    state = state.copyWith(messages: messages);
+  }
+
+  void clearLists() {
+    state = state.copyWith(messages: []);
   }
 }
 
@@ -79,23 +98,28 @@ class _SpeechState {
   /// 信頼度
   final double confidence;
 
+  /// チャットに表示されるメッセージ
+  final List<String> messages;
+
   _SpeechState({
     this.isListening = false,
     this.text = '',
     this.confidence = 1.0,
-  });
+    List<String>? messages,
+  }) : messages = messages ?? [];
 
   /// 特定のプロパティを更新する新しいStateを返す
   _SpeechState copyWith({
-    bool? isAvailable,
     bool? isListening,
     String? text,
     double? confidence,
+    List<String>? messages,
   }) {
     return _SpeechState(
       isListening: isListening ?? this.isListening,
       text: text ?? this.text,
       confidence: confidence ?? this.confidence,
+      messages: messages ?? this.messages,
     );
   }
 }

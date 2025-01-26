@@ -30,16 +30,13 @@ class SpeechToTextScreen extends ConsumerStatefulWidget {
 
 class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final List<String> _messages = []; // List to store chat messages
 
-  void _sendMessage() {
-    final message = _messageController.text.trim();
-    if (message.isNotEmpty) {
-      setState(() {
-        _messages.add(message); // Add the message to the chat list
-      });
-      _messageController.clear(); // Clear the input field
-    }
+  String _generateMessage() {
+    return _messageController.text.trim();
+  }
+
+  void _clearMessageController() {
+    _messageController.clear();
   }
 
   @override
@@ -50,7 +47,11 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Speech to Text (Confidence: ${(speechState.confidence * 100).toStringAsFixed(1)}%)',
+          'Speech to Text',
+        ),
+        leading: TextButton(
+          onPressed: speechNotifier.clearLists,
+          child: Text("クリア"),
         ),
       ),
       body: Column(
@@ -59,7 +60,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(8.0),
-              itemCount: _messages.length,
+              itemCount: speechState.messages.length,
               itemBuilder: (context, index) {
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -69,7 +70,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: Text(
-                    _messages[index],
+                    speechState.messages[index],
                     style: const TextStyle(fontSize: 16.0),
                   ),
                 );
@@ -79,15 +80,8 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
           // 音声読み取りボタン
           TextButton.icon(
             onPressed: () async {
-              final String text = speechState.text;
               // モード切り替え
               speechNotifier.changeMicMode();
-              print("text: $text");
-              if (text.isNotEmpty && speechState.isListening) {
-                // テキストが入力されていればメッセージに追加
-                print("add text");
-                _messages.add(text);
-              }
             },
             icon: speechState.isListening
                 ? Icon(Icons.mic)
@@ -113,7 +107,11 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                 ),
                 const SizedBox(width: 8.0),
                 FloatingActionButton(
-                  onPressed: _sendMessage,
+                  onPressed: () {
+                    String message = _generateMessage();
+                    speechNotifier.addLists(message);
+                    _clearMessageController();
+                  },
                   child: const Icon(Icons.send),
                 ),
               ],
