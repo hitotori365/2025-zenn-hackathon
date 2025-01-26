@@ -42,6 +42,12 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
 
   /// listening開始
   void _startListening() {
+    // listening中の状態に更新
+    state = state.copyWith(
+      isListening: true,
+      text: "",
+    );
+
     _speech.listen(onResult: (result) {
       // 認識されたテキストと信頼度を更新
       state = state.copyWith(
@@ -49,15 +55,16 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
         confidence: result.hasConfidenceRating ? result.confidence : 1.0,
       );
     });
-    // listening中の状態に更新
-    state = state.copyWith(isListening: true);
   }
 
   /// listening停止
   void _stopListening() {
     _speech.stop();
     // listening停止の状態に更新
-    state = state.copyWith(isListening: false);
+    state = state.copyWith(
+      isListening: false,
+    );
+    print("stop listening.");
   }
 }
 
@@ -74,7 +81,7 @@ class _SpeechState {
 
   _SpeechState({
     this.isListening = false,
-    this.text = 'Press the button and start speaking!',
+    this.text = '',
     this.confidence = 1.0,
   });
 

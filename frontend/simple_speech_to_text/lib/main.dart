@@ -21,15 +21,30 @@ class SpeechToTextApp extends StatelessWidget {
   }
 }
 
-class SpeechToTextScreen extends ConsumerWidget {
+class SpeechToTextScreen extends ConsumerStatefulWidget {
   const SpeechToTextScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 状態を参照するためのインスタンス
-    // 状態が変更されるとWidgetが再構築される
+  _SpeechToTextScreenState createState() => _SpeechToTextScreenState();
+}
+
+class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final List<String> _messages = []; // List to store chat messages
+
+  void _sendMessage() {
+    final message = _messageController.text.trim();
+    if (message.isNotEmpty) {
+      setState(() {
+        _messages.add(message); // Add the message to the chat list
+      });
+      _messageController.clear(); // Clear the input field
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final speechState = ref.watch(speechStateProvider);
-    // メソッドにアクセスするためのインスタンス
     final speechNotifier = ref.read(speechStateProvider.notifier);
 
     return Scaffold(
@@ -38,37 +53,73 @@ class SpeechToTextScreen extends ConsumerWidget {
           'Speech to Text (Confidence: ${(speechState.confidence * 100).toStringAsFixed(1)}%)',
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: SingleChildScrollView(
+      body: Column(
+        children: [
+          // チャットリスト
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4.0),
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[100],
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                   child: Text(
-                    speechState.text,
-                    style: TextStyle(fontSize: 18.0),
+                    _messages[index],
+                    style: const TextStyle(fontSize: 16.0),
+                  ),
+                );
+              },
+            ),
+          ),
+          // 音声読み取りボタン
+          TextButton.icon(
+            onPressed: () async {
+              final String text = speechState.text;
+              // モード切り替え
+              speechNotifier.changeMicMode();
+              print("text: $text");
+              if (text.isNotEmpty && speechState.isListening) {
+                // テキストが入力されていればメッセージに追加
+                print("add text");
+                _messages.add(text);
+              }
+            },
+            icon: speechState.isListening
+                ? Icon(Icons.mic)
+                : Icon(Icons.mic_none),
+            label:
+                speechState.isListening ? Text("音声読み取り終了") : Text("音声読み取り開始"),
+          ),
+          // テキストフィールド
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'メッセージを入力',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 8.0),
+                FloatingActionButton(
+                  onPressed: _sendMessage,
+                  child: const Icon(Icons.send),
+                ),
+              ],
             ),
-            SizedBox(height: 16.0),
-            FloatingActionButton(
-              onPressed: () async {
-                speechNotifier.changeMicMode();
-              },
-              child: Icon(
-                speechState.isListening ? Icons.mic : Icons.mic_none,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
