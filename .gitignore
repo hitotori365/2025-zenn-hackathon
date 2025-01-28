@@ -221,3 +221,9 @@ package-lock.json
 
 # common
 .env
+
+# Terraform
+backend/.terraform/
+backend/.terraform.lock.hcl
+backend/terraform.tfstate
+backend/terraform.tfstate.backup
