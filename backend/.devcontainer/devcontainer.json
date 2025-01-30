@@ -1,0 +1,30 @@
+{
+    "name": "FastAPI Development Container",
+    "dockerFile": "Dockerfile",
+    "forwardPorts": [
+        8080
+    ],
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.linting.enabled": true,
+                "python.formatting.provider": "black",
+                "editor.formatOnSave": true
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance"
+            ]
+        }
+    },
+    "postCreateCommand": "pip install -r requirements.txt",
+    "mounts": [
+        "type=bind,source=${localWorkspaceFolder}/vertex-ai-service-account.json,target=/workspace/vertex-ai-service-account.json,readonly"
+    ],
+    "remoteEnv": {
+        "PROJECT_ID": "${localEnv:PROJECT_ID}",
+        "TOKEN":  "${localEnv:TOKEN}",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/workspace/vertex-ai-service-account.json"
+    }
+}

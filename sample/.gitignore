@@ -1,0 +1,11 @@
+# python generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# venv
+.venv
+zenn-hacathon-8b4383d9821e.json

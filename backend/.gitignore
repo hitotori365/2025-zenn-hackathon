@@ -1,0 +1,4 @@
+.env
+service-account-key.json
+terraform.tfvars
+vertex-ai-service-account.json
