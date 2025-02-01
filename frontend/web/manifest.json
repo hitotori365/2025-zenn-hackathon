@@ -1,6 +1,6 @@
 {
-    "name": "frontend",
-    "short_name": "frontend",
+    "name": "simple_speech_to_text",
+    "short_name": "simple_speech_to_text",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
