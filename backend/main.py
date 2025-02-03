@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import APIKeyHeader
+from fastapi.middleware.cors import CORSMiddleware
 import vertexai
 from vertexai.generative_models import GenerativeModel
 import os
@@ -42,6 +43,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     point: int
+    progress: int 
 
 token = os.getenv("TOKEN")
 if not token:
@@ -56,6 +58,14 @@ def verify_token(auth_header: str = Depends(api_key_header)):
         )
     
 app = FastAPI( dependencies=[Depends(verify_token)],)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # すべてのオリジンを許可
+    allow_credentials=True,
+    allow_methods=["*"],  # すべてのHTTPメソッドを許可
+    allow_headers=["*"],  # すべてのヘッダーを許可
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -125,6 +135,47 @@ async def analyze_anger_level(text: str) -> int:
         logger.error(f"Error in anger analysis: {e}")
         return 3  # エラー時はデフォルト値として中間の3を返す
 
+async def analyze_progress(messages: List[Message]) -> int:
+    """
+    会話履歴から悩み解決の進捗度を0-100で評価する
+    """
+    if not messages:
+        return 0
+        
+    analysis_prompt = """
+    以下の会話履歴から、悩みの解決進捗度を0から100の整数で評価してください。
+    
+    評価基準:
+    0-20: 問題が明確になっていない、または解決への糸口が見えていない
+    21-40: 問題は明確だが、解決策がまだ見つかっていない
+    41-60: 解決策は提示されているが、実行への不安や躊躇がある
+    61-80: 解決策が受け入れられ、実行する意思が示されている
+    81-100: 解決に向けて具体的な行動計画が立てられている、または問題が解決している
+    
+    返答は数字のみにしてください。
+    
+    会話履歴:
+    """
+    
+    # 会話履歴をフォーマット
+    conversation = "\n".join([f"{'ユーザー' if msg.role == 'user' else 'アシスタント'}: {msg.content}" for msg in messages])
+    
+    try:
+        response = model.generate_content(
+            analysis_prompt + conversation,
+            generation_config={
+                "temperature": 0.1,
+                "max_output_tokens": 10,
+            },
+        )
+        # 数値以外の文字を除去して整数に変換
+        progress = int(''.join(filter(str.isdigit, response.text)))
+        # 0-100の範囲に収める
+        return max(0, min(100, progress))
+    except Exception as e:
+        logger.error(f"Error in progress analysis: {e}")
+        return 50  # エラー時はデフォルト値として中間の50を返す
+    
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     if not model:
@@ -161,10 +212,14 @@ async def chat(request: ChatRequest):
             anger_level = await analyze_anger_level(request.messages[-1].content)
         else:
             anger_level = 1  # デフォルト値
+            
+        progress_level = await analyze_progress(updated_messages)
 
         return ChatResponse(
             response=response.text,
-            point=anger_level
+            point=anger_level,
+            progress=progress_level
+
         )
     except Exception as e:
         logger.error(f"Error in chat generation: {e}")
