@@ -1,0 +1,6 @@
+.dart_tool/
+.git/
+.github/
+.gitignore
+build/
+.env

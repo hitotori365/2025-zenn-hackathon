@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,8 +17,18 @@ class ApiResponse {
 
 class ApiService {
   List<Map<String, dynamic>> messageHistory = [];
-  final String _token = dotenv.env['API_TOKEN']!;
+  final String _token;
 
+  // コンストラクタでの初期化
+  ApiService() : _token = const String.fromEnvironment(
+    'API_TOKEN',
+    defaultValue: '',
+  ) {
+    // トークンが空の場合はエラーを投げる
+    if (_token.isEmpty) {
+      throw Exception('API_TOKEN is not set');
+    }
+  }
   Future<ApiResponse> sendMessage(String message) async {
     // ユーザーメッセージを追加
     final userMessage = {
