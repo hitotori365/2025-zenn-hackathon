@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+
 import '../services/api_service.dart';
 
 final _speechProvider = Provider<stt.SpeechToText>((_) {
@@ -8,7 +9,8 @@ final _speechProvider = Provider<stt.SpeechToText>((_) {
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
-final speechStateProvider = StateNotifierProvider<_SpeechStateNotifier, _SpeechState>((ref) {
+final speechStateProvider =
+    StateNotifierProvider<_SpeechStateNotifier, _SpeechState>((ref) {
   final speech = ref.read(_speechProvider);
   final apiService = ref.read(apiServiceProvider);
   return _SpeechStateNotifier(speech, apiService);
@@ -64,6 +66,10 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
 
     try {
       final apiResponse = await _apiService.sendMessage(text);
+      print('response: ${apiResponse.response}');
+      print('point: ${apiResponse.point}');
+      print('progress: ${apiResponse.progress}');
+
       messages.add(apiResponse.response);
       state = state.copyWith(messages: messages);
     } catch (e) {

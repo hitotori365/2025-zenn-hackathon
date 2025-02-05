@@ -1,12 +1,18 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 class ApiResponse {
   final String response;
   final int point;
+  final int progress;
 
-  ApiResponse({required this.response, required this.point});
+  ApiResponse({
+    required this.response,
+    required this.point,
+    required this.progress,
+  });
 }
 
 class ApiService {
@@ -14,26 +20,28 @@ class ApiService {
   final String _token = dotenv.env['API_TOKEN']!;
 
   Future<ApiResponse> sendMessage(String message) async {
-
     // ユーザーメッセージを追加
     final userMessage = {
       'role': 'user',
-      'content': message
+      'content': message,
     };
     messageHistory.add(userMessage);
 
     final response = await http.post(
-      Uri.parse('https://my-app-service-132373106783.asia-northeast1.run.app/chat'),
+      Uri.parse(
+          'https://my-app-service-132373106783.asia-northeast1.run.app/chat'),
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $_token',
       },
       body: jsonEncode({
-        'messages': messageHistory.map((m) => {
-          'role': m['role'],
-          'content': m['content']
-        }).toList()
+        'messages': messageHistory
+            .map((m) => {
+                  'role': m['role'],
+                  'content': m['content'],
+                })
+            .toList()
       }),
     );
 
@@ -42,11 +50,14 @@ class ApiService {
       final data = jsonDecode(decodedResponse);
       final assistantMessage = {
         'role': 'assistant',
-        'content': data['response']
+        'content': data['response'],
       };
       messageHistory.add(assistantMessage);
-
-      return ApiResponse(response: data['response'], point: data['point']);
+      return ApiResponse(
+        response: data['response'],
+        point: data['point'],
+        progress: data['progress'],
+      );
     }
     throw Exception('API failed');
   }
