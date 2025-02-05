@@ -1,8 +1,9 @@
 ### build
 ```
-docker build --platform linux/amd64 -t app .
+docker build --no-cache --platform linux/amd64 -t app .
 docker tag app ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/app:latest
 docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/app:latest
+terraform apply
 ```
 
 ### devcontainer内/appで実行

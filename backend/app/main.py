@@ -10,6 +10,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv, dotenv_values
 from random import randint
+from google.cloud import texttospeech
+import base64
+import asyncio
+from asyncio import gather
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 # 環境変数の設定を関数化
@@ -44,6 +48,7 @@ class ChatResponse(BaseModel):
     response: str
     point: int
     progress: int 
+    audio: str
 
 token = os.getenv("TOKEN")
 if not token:
@@ -175,7 +180,46 @@ async def analyze_progress(messages: List[Message]) -> int:
     except Exception as e:
         logger.error(f"Error in progress analysis: {e}")
         return 50  # エラー時はデフォルト値として中間の50を返す
-    
+
+
+# Text-to-Speech機能を実装する関数
+async def generate_speech(text: str) -> str:
+    try:
+        # Text-to-Speech クライアントを初期化
+        client = texttospeech.TextToSpeechClient()
+
+        # 合成する入力テキストを設定
+        synthesis_input = texttospeech.SynthesisInput(text=text)
+
+        # 音声パラメータを設定
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="ja-JP",
+            name="ja-JP-Neural2-D"
+        )
+
+        # オーディオ設定
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.LINEAR16,
+            effects_profile_id=["small-bluetooth-speaker-class-device"],
+            pitch=0,
+            speaking_rate=1
+        )
+
+        # リクエストを実行
+        response = client.synthesize_speech(
+            input=synthesis_input,
+            voice=voice,
+            audio_config=audio_config
+        )
+
+        # 音声データをbase64エンコード
+        audio_base64 = base64.b64encode(response.audio_content).decode('utf-8')
+        return audio_base64
+
+    except Exception as e:
+        logger.error(f"Error in speech generation: {e}")
+        return ""
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     if not model:
@@ -191,10 +235,9 @@ async def chat(request: ChatRequest):
             role_prefix = "User: " if msg.role == "user" else "Assistant: "
             formatted_history += f"{role_prefix}{msg.content}\n"
         
-        # 最後のプロンプトを追加
         formatted_history += "Assistant: "
 
-        # 生成
+        # テキスト応答を生成（これは他のタスクの依存元なので先に実行）
         response = model.generate_content(
             formatted_history,
             generation_config={
@@ -202,30 +245,44 @@ async def chat(request: ChatRequest):
                 "max_output_tokens": 1024,
             },
         )
-        
-        # 新しい応答をメッセージリストに追加
+
+        # 新しい応答を含むメッセージリストを作成
         updated_messages = request.messages + [
             Message(role="assistant", content=response.text)
         ]
-        # 最後のユーザーメッセージの怒り度合いを分析
+
+        # 並列実行する独立したタスクを準備
+        tasks = []
+        
+        # 音声生成タスク
+        tasks.append(generate_speech(response.text))
+        
+        # 怒り度分析タスク（最後のユーザーメッセージがある場合のみ）
         if request.messages and request.messages[-1].role == "user":
-            anger_level = await analyze_anger_level(request.messages[-1].content)
+            tasks.append(analyze_anger_level(request.messages[-1].content))
         else:
-            anger_level = 1  # デフォルト値
+            tasks.append(asyncio.create_task(asyncio.sleep(0)))  # ダミータスク
             
-        progress_level = await analyze_progress(updated_messages)
+        # 進捗度分析タスク
+        tasks.append(analyze_progress(updated_messages))
+
+        # すべてのタスクを並列実行
+        audio_data, anger_level, progress_level = await gather(*tasks)
+
+        # anger_levelがダミータスクだった場合のデフォルト値設定
+        if isinstance(anger_level, type(None)):
+            anger_level = 1
 
         return ChatResponse(
             response=response.text,
             point=anger_level,
-            progress=progress_level
-
+            progress=progress_level,
+            audio=audio_data
         )
+
     except Exception as e:
         logger.error(f"Error in chat generation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8080))
