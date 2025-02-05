@@ -62,7 +62,11 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
   Future<void> addLists(String text) async {
     List<String> messages = state.messages;
     messages.add(text);
-    state = state.copyWith(messages: messages);
+    // ローディング開始
+    state = state.copyWith(
+      messages: messages,
+      isLoading: true,
+    );
 
     try {
       final apiResponse = await _apiService.sendMessage(text);
@@ -71,25 +75,36 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
       print('progress: ${apiResponse.progress}');
 
       messages.add(apiResponse.response);
-      state = state.copyWith(messages: messages);
+      // ローディング終了
+      state = state.copyWith(
+        messages: messages,
+        isLoading: false,
+      );
     } catch (e) {
       print('Error: $e');
+      // エラー時もローディング終了
+      state = state.copyWith(isLoading: false);
     }
   }
 
   void clearLists() {
-    state = state.copyWith(messages: []);
+    state = state.copyWith(
+      messages: [],
+      isLoading: false,
+    );
   }
 }
 
 class _SpeechState {
   final bool isListening;
+  final bool isLoading; // 追加
   final String text;
   final double confidence;
   final List<String> messages;
 
   _SpeechState({
     this.isListening = false,
+    this.isLoading = false, // 初期値の設定
     this.text = '',
     this.confidence = 1.0,
     List<String>? messages,
@@ -97,12 +112,14 @@ class _SpeechState {
 
   _SpeechState copyWith({
     bool? isListening,
+    bool? isLoading, // 追加
     String? text,
     double? confidence,
     List<String>? messages,
   }) {
     return _SpeechState(
       isListening: isListening ?? this.isListening,
+      isLoading: isLoading ?? this.isLoading, // 追加
       text: text ?? this.text,
       confidence: confidence ?? this.confidence,
       messages: messages ?? this.messages,
