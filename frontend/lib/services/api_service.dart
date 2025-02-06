@@ -7,24 +7,28 @@ class ApiResponse {
   final String response;
   final int point;
   final int progress;
+  final String audio;
 
   ApiResponse({
     required this.response,
     required this.point,
     required this.progress,
+    required this.audio,
   });
 }
 
 class ApiService {
   List<Map<String, dynamic>> messageHistory = [];
-  final String _token;
+  late final String _token;
 
   // コンストラクタでの初期化
-  ApiService() : _token = const String.fromEnvironment(
-    'API_TOKEN',
-    defaultValue: '',
-  ) {
-    // トークンが空の場合はエラーを投げる
+  ApiService() {
+    // .envファイルから読み込むか、ビルド時の環境変数から読み込む
+    _token = dotenv.env['API_TOKEN'] ?? const String.fromEnvironment(
+      'API_TOKEN',
+      defaultValue: '',
+    );
+
     if (_token.isEmpty) {
       throw Exception('API_TOKEN is not set');
     }
@@ -67,6 +71,7 @@ class ApiService {
         response: data['response'],
         point: data['point'],
         progress: data['progress'],
+        audio: data['audio'],
       );
     }
     throw Exception('API failed');
