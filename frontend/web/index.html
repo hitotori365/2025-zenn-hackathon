@@ -22,6 +22,15 @@
     var serviceWorkerVersion = null;
   </script>
   <script src="flutter.js" defer></script>
+  <script>
+    if ('audioWorklet' in AudioContext.prototype) {
+      AudioContext.prototype.originalCreateMediaElementSource = AudioContext.prototype.createMediaElementSource;
+      AudioContext.prototype.createMediaElementSource = function(element) {
+        element.crossOrigin = 'anonymous';
+        return this.originalCreateMediaElementSource(element);
+      };
+    }
+  </script>
 </head>
 <body>
   <script>

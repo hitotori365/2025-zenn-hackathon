@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'dart:convert';
+import 'package:just_audio/just_audio.dart';
+import 'dart:html' as html;
 
 import '../services/api_service.dart';
 
@@ -19,6 +22,7 @@ final speechStateProvider =
 class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
   final stt.SpeechToText _speech;
   final ApiService _apiService;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   _SpeechStateNotifier(this._speech, this._apiService) : super(_SpeechState());
 
@@ -59,6 +63,26 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
     }
   }
 
+  Future<void> playAudio(String base64Audio) async {
+    try {
+      // base64をデコード
+      final bytes = base64Decode(base64Audio);
+      
+      // Web用の音声再生処理
+      final blob = html.Blob([bytes], 'audio/wav');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      
+      // AudioPlayerで再生
+      await _audioPlayer.setUrl(url);
+      await _audioPlayer.play();
+      
+      // 使用後にURLを解放
+      html.Url.revokeObjectUrl(url);
+    } catch (e) {
+      print('Error playing audio: $e');
+    }
+  }
+  
   Future<void> addLists(String text) async {
     List<String> messages = state.messages;
     messages.add(text);
@@ -83,6 +107,9 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
         isLoading: false,
         totalPoints: newTotalPoints,
       );
+      if (apiResponse.audio.isNotEmpty) {
+        await playAudio(apiResponse.audio);
+      }
     } catch (e) {
       print('Error: $e');
       // エラー時もローディング終了
