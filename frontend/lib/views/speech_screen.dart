@@ -11,7 +11,7 @@ class SpeechToTextScreen extends ConsumerStatefulWidget {
 
 class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   final TextEditingController _messageController = TextEditingController();
-  static const int PROGRESS_THRESHOLD = 80;
+  static const int PROGRESS_THRESHOLD = 20;
 
   String _generateMessage() {
     return _messageController.text.trim();
@@ -25,7 +25,6 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   Widget build(BuildContext context) {
     final speechState = ref.watch(speechStateProvider);
     final speechNotifier = ref.read(speechStateProvider.notifier);
-
 
     return Scaffold(
       appBar: AppBar(
@@ -74,6 +73,30 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                     speechState.isListening ? "音声読み取り終了" : "音声読み取り開始"
                 ),
               ),
+              if (speechState.totalPoints >= PROGRESS_THRESHOLD)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: const Text(
+                      "呪い終える",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(

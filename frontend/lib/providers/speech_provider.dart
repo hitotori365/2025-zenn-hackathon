@@ -75,10 +75,13 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
       print('progress: ${apiResponse.progress}');
 
       messages.add(apiResponse.response);
+      final newTotalPoints = state.totalPoints + apiResponse.point;
+      print('newTotalPoints: $newTotalPoints');
       // ローディング終了
       state = state.copyWith(
         messages: messages,
         isLoading: false,
+        totalPoints: newTotalPoints,
       );
     } catch (e) {
       print('Error: $e');
@@ -91,6 +94,7 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
     state = state.copyWith(
       messages: [],
       isLoading: false,
+      totalPoints: 0,
     );
   }
 }
@@ -101,6 +105,7 @@ class _SpeechState {
   final String text;
   final double confidence;
   final List<String> messages;
+  final int totalPoints;
 
   _SpeechState({
     this.isListening = false,
@@ -108,6 +113,7 @@ class _SpeechState {
     this.text = '',
     this.confidence = 1.0,
     List<String>? messages,
+    this.totalPoints = 0,
   }) : messages = messages ?? [];
 
   _SpeechState copyWith({
@@ -116,6 +122,7 @@ class _SpeechState {
     String? text,
     double? confidence,
     List<String>? messages,
+    int? totalPoints,
   }) {
     return _SpeechState(
       isListening: isListening ?? this.isListening,
@@ -123,6 +130,7 @@ class _SpeechState {
       text: text ?? this.text,
       confidence: confidence ?? this.confidence,
       messages: messages ?? this.messages,
+      totalPoints: totalPoints ?? this.totalPoints,
     );
   }
 }
