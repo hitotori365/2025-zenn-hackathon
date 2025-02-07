@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'views/speech_screen.dart';
+import 'views/completion_screen.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -19,7 +20,11 @@ class SpeechToTextApp extends StatelessWidget {
     return MaterialApp(
       title: 'Speech to Text',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: SpeechToTextScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SpeechToTextScreen(),
+        '/completion': (context) => const CompletionScreen(),
+      },
     );
   }
 }
