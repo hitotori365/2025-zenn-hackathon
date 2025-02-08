@@ -37,7 +37,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
         title: const Text('ワラドール・トーク'),
         leading: IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: speechNotifier.clearLists,
+          onPressed: speechNotifier.resetChat,
         ),
       ),
       body: Stack(

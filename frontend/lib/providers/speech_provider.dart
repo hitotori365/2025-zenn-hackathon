@@ -135,8 +135,8 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
     }
   }
 
-  void clearLists() {
-    _apiService.clearMessageHistory();
+  void resetChat() {
+    _apiService.resetMessageHistory();
     state = state.copyWith(
       messages: [],
       isLoading: false,

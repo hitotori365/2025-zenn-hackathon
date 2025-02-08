@@ -79,7 +79,7 @@ class ApiService {
   }
 
   /// メッセージ履歴を全削除
-  void clearMessageHistory() {
+  void resetMessageHistory() {
     messageHistory.clear();
   }
 }
