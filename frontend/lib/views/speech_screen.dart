@@ -15,10 +15,10 @@ class SpeechToTextScreen extends ConsumerStatefulWidget {
 class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   final TextEditingController _messageController = TextEditingController();
   static const int PROGRESS_THRESHOLD = 20;
-  bool _hasText = false;
+  String inputText = '';
 
   String _generateMessage() {
-    return _messageController.text.trim();
+    return inputText;
   }
 
   void _clearMessageController() {
@@ -31,7 +31,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
     // TextEditingControllerにリスナーを追加
     _messageController.addListener(() {
       setState(() {
-        _hasText = _messageController.text.trim().isNotEmpty;
+        inputText = _messageController.text.trim();
       });
     });
   }
@@ -144,7 +144,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                     const SizedBox(width: 8.0),
                     FloatingActionButton(
                       onPressed: (speechState.isLoading ||
-                              _messageController.text.trim().isEmpty)
+                              inputText.isEmpty)
                           ? null
                           : () {
                               String message = _generateMessage();
@@ -152,13 +152,13 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                               _clearMessageController();
                             },
                       backgroundColor: (speechState.isLoading ||
-                              _messageController.text.trim().isEmpty)
+                              inputText.isEmpty)
                           ? Colors.grey[300]
                           : Colors.blue,
                       child: Icon(
                         Icons.send,
                         color: (speechState.isLoading ||
-                                _messageController.text.trim().isEmpty)
+                                inputText.isEmpty)
                             ? Colors.grey[600]
                             : Colors.white,
                       ),
