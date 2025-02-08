@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/speech_provider.dart';
+import '../utils/message_controller.dart';
 import '../utils/scrolling_controller.dart';
 import 'completion_screen.dart';
 
@@ -13,33 +14,16 @@ class SpeechToTextScreen extends ConsumerStatefulWidget {
 }
 
 class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
-  final TextEditingController _messageController = TextEditingController();
   static const int PROGRESS_THRESHOLD = 20;
-  String inputText = '';
-
-  String _generateMessage() {
-    return inputText;
-  }
-
-  void _clearMessageController() {
-    _messageController.clear();
-  }
 
   @override
   void initState() {
     super.initState();
-    // TextEditingControllerにリスナーを追加
-    _messageController.addListener(() {
-      setState(() {
-        inputText = _messageController.text.trim();
-      });
+    final messageController = ref.read(messageControllerProvider.notifier);
+    messageController.addListener(() {
+      // 入力テキストが変化すると再描画する
+      setState(() {});
     });
-  }
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -47,6 +31,8 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
     final speechState = ref.watch(speechStateProvider);
     final speechNotifier = ref.read(speechStateProvider.notifier);
     final scrollingController = ref.watch(scrollingControllerProvider.notifier);
+    final messageController = ref.read(messageControllerProvider.notifier);
+    final inputText = messageController.textEditingController.text.trim();
 
     return Scaffold(
       appBar: AppBar(
@@ -132,7 +118,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: _messageController,
+                        controller: messageController.textEditingController,
                         decoration: InputDecoration(
                           hintText: 'メッセージを入力',
                           border: OutlineInputBorder(
@@ -143,22 +129,20 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                     ),
                     const SizedBox(width: 8.0),
                     FloatingActionButton(
-                      onPressed: (speechState.isLoading ||
-                              inputText.isEmpty)
+                      onPressed: (speechState.isLoading || inputText.isEmpty)
                           ? null
                           : () {
-                              String message = _generateMessage();
+                              String message = messageController.message;
                               speechNotifier.addLists(message);
-                              _clearMessageController();
+                              messageController.clearMessage();
                             },
-                      backgroundColor: (speechState.isLoading ||
-                              inputText.isEmpty)
-                          ? Colors.grey[300]
-                          : Colors.blue,
+                      backgroundColor:
+                          (speechState.isLoading || inputText.isEmpty)
+                              ? Colors.grey[300]
+                              : Colors.blue,
                       child: Icon(
                         Icons.send,
-                        color: (speechState.isLoading ||
-                                inputText.isEmpty)
+                        color: (speechState.isLoading || inputText.isEmpty)
                             ? Colors.grey[600]
                             : Colors.white,
                       ),
