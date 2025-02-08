@@ -5,7 +5,7 @@ import '../providers/speech_provider.dart';
 import '../utils/message_controller.dart';
 import '../utils/scrolling_controller.dart';
 import 'chat_list_view.dart';
-import 'completion_screen.dart';
+import 'finish_button_view.dart';
 
 class SpeechToTextScreen extends ConsumerStatefulWidget {
   const SpeechToTextScreen({super.key});
@@ -59,30 +59,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
               if (speechState.totalPoints >= PROGRESS_THRESHOLD)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const CompletionScreen(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: const Text(
-                      "もう藁人形には頼らない",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
+                  child: FinishButtonView(),
                 ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
