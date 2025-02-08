@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/speech_provider.dart';
+import 'completion_screen.dart';
 
 class SpeechToTextScreen extends ConsumerStatefulWidget {
   const SpeechToTextScreen({super.key});
@@ -11,7 +12,8 @@ class SpeechToTextScreen extends ConsumerStatefulWidget {
 
 class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   final TextEditingController _messageController = TextEditingController();
-  static const int PROGRESS_THRESHOLD = 20;
+  static const int PROGRESS_THRESHOLD = 5;
+  bool _hasText = false;
 
   String _generateMessage() {
     return _messageController.text.trim();
@@ -20,6 +22,25 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   void _clearMessageController() {
     _messageController.clear();
   }
+
+
+  @override
+  void initState() {
+    super.initState();
+    // TextEditingControllerにリスナーを追加
+    _messageController.addListener(() {
+      setState(() {
+        _hasText = _messageController.text.trim().isNotEmpty;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -78,17 +99,21 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const CompletionScreen(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: Colors.blue,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
                         vertical: 12,
                       ),
                     ),
                     child: const Text(
-                      "呪い終える",
+                      "もう藁人形には頼らない",
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -114,23 +139,22 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                     ),
                     const SizedBox(width: 8.0),
                     FloatingActionButton(
-                      onPressed: speechState.isLoading
+                      onPressed: (speechState.isLoading || _messageController.text.trim().isEmpty)
                           ? null
                           : () {
                         String message = _generateMessage();
                         speechNotifier.addLists(message);
                         _clearMessageController();
                       },
-                      child: speechState.isLoading
-                          ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                          : const Icon(Icons.send),
+                      backgroundColor: (speechState.isLoading || _messageController.text.trim().isEmpty)
+                          ? Colors.grey[300]
+                          : Colors.blue,
+                      child: Icon(
+                        Icons.send,
+                        color: (speechState.isLoading || _messageController.text.trim().isEmpty)
+                            ? Colors.grey[600]
+                            : Colors.white,
+                      ),
                     ),
                   ],
                 ),
