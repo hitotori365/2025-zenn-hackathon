@@ -6,7 +6,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../services/api_service.dart';
-import '../utils/scrolling_controller.dart';
+import 'scrolling_provider.dart';
 
 final _speechProvider = Provider<stt.SpeechToText>((_) {
   return stt.SpeechToText();
@@ -18,8 +18,12 @@ final speechStateProvider =
     StateNotifierProvider<_SpeechStateNotifier, _SpeechState>((ref) {
   final speech = ref.read(_speechProvider);
   final apiService = ref.read(apiServiceProvider);
-  final scrollingController = ref.read(scrollingControllerProvider.notifier);
-  return _SpeechStateNotifier(speech, apiService, scrollingController);
+  final scrollingController = ref.read(scrollingProvider.notifier);
+  return _SpeechStateNotifier(
+    speech,
+    apiService,
+    scrollingController,
+  );
 });
 
 class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
@@ -98,7 +102,7 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
       isLoading: true,
     );
     // 下部までスクロール
-      _scrollingController.scrollToBottom();
+    _scrollingController.scrollToBottom();
 
     try {
       final apiResponse = await _apiService.sendMessage(text);
@@ -131,7 +135,8 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
     }
   }
 
-  void clearLists() {
+  void resetChat() {
+    _apiService.resetMessageHistory();
     state = state.copyWith(
       messages: [],
       isLoading: false,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final scrollingControllerProvider =
+final scrollingProvider =
     NotifierProvider<ScrollingController, String>(ScrollingController.new);
 
 class ScrollingController extends Notifier<String> {

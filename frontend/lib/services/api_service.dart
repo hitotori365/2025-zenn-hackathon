@@ -77,4 +77,9 @@ class ApiService {
     }
     throw Exception('API failed');
   }
+
+  /// メッセージ履歴を全削除
+  void resetMessageHistory() {
+    messageHistory.clear();
+  }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// メッセージを管理するコントローラを提供するプロバイダ
-final messageControllerProvider =
+final messageProvider =
     NotifierProvider<MessageController, String>(MessageController.new);
 
 /// メッセージを管理するコントローラ

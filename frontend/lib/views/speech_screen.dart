@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/message_provider.dart';
 import '../providers/speech_provider.dart';
-import '../utils/message_controller.dart';
 import 'chat_list_view.dart';
 import 'finish_button_view.dart';
 import 'text_field_view.dart';
@@ -20,7 +20,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   @override
   void initState() {
     super.initState();
-    final messageController = ref.read(messageControllerProvider.notifier);
+    final messageController = ref.read(messageProvider.notifier);
     messageController.addListener(() {
       // 入力テキストが変化すると再描画する
       setState(() {});
@@ -34,10 +34,10 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Speech to Text'),
-        leading: TextButton(
-          onPressed: speechNotifier.clearLists,
-          child: const Text("クリア"),
+        title: const Text('ワラドール・トーク'),
+        leading: IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: speechNotifier.resetChat,
         ),
       ),
       body: Stack(

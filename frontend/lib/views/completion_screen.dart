@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../providers/speech_provider.dart';
 
 class CompletionScreen extends ConsumerWidget {
@@ -24,11 +25,11 @@ class CompletionScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () {
                 // プロバイダーの状態をリセット
-                ref.read(speechStateProvider.notifier).clearLists();
+                ref.read(speechStateProvider.notifier).resetChat();
                 // 画面遷移
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/',
-                      (route) => false,
+                  (route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(
