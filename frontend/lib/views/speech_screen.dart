@@ -6,6 +6,7 @@ import '../utils/message_controller.dart';
 import '../utils/scrolling_controller.dart';
 import 'chat_list_view.dart';
 import 'finish_button_view.dart';
+import 'text_field_view.dart';
 
 class SpeechToTextScreen extends ConsumerStatefulWidget {
   const SpeechToTextScreen({super.key});
@@ -47,9 +48,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
         children: [
           Column(
             children: [
-              ChatListView(
-                scrollingController,
-              ),
+              ChatListView(),
               TextButton.icon(
                 onPressed: speechNotifier.changeMicMode,
                 icon:
@@ -63,41 +62,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                 ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: messageController.textEditingController,
-                        decoration: InputDecoration(
-                          hintText: 'メッセージを入力',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    FloatingActionButton(
-                      onPressed: (speechState.isLoading || inputText.isEmpty)
-                          ? null
-                          : () {
-                              String message = messageController.message;
-                              speechNotifier.addLists(message);
-                              messageController.clearMessage();
-                            },
-                      backgroundColor:
-                          (speechState.isLoading || inputText.isEmpty)
-                              ? Colors.grey[300]
-                              : Colors.blue,
-                      child: Icon(
-                        Icons.send,
-                        color: (speechState.isLoading || inputText.isEmpty)
-                            ? Colors.grey[600]
-                            : Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
+                child: TextFieldView(),
               ),
             ],
           ),
