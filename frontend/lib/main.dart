@@ -18,7 +18,7 @@ class SpeechToTextApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Speech to Text',
+      title: 'ワラドール・トーク',
       theme: ThemeData.dark(),
       initialRoute: '/',
       routes: {
