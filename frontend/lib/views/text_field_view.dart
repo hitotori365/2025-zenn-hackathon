@@ -16,6 +16,15 @@ class TextFieldView extends ConsumerWidget {
     final messageController = ref.read(messageProvider.notifier);
     final inputText = messageController.textEditingController.text.trim();
 
+    // 送信処理
+    void sendMessage() {
+      if (!speechState.isLoading && inputText.isNotEmpty) {
+        String message = messageController.message;
+        speechNotifier.addLists(message);
+        messageController.clearMessage();
+      }
+    }
+
     return Row(
       children: [
         Expanded(
@@ -28,17 +37,12 @@ class TextFieldView extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
+            onSubmitted: (_) => sendMessage(),
           ),
         ),
         const SizedBox(width: 8.0),
         FloatingActionButton(
-          onPressed: (speechState.isLoading || inputText.isEmpty)
-              ? null
-              : () {
-                  String message = messageController.message;
-                  speechNotifier.addLists(message);
-                  messageController.clearMessage();
-                },
+          onPressed: () => sendMessage(),
           backgroundColor: (speechState.isLoading || inputText.isEmpty)
               ? Colors.grey[300]
               : Colors.blue,
