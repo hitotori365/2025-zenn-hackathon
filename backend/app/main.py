@@ -100,6 +100,8 @@ CHAT_SETTINGS = {
     - きつい暴言を言われても明るく受け止められる
     - 状況を整理してくれる
     - 相手の気持ちに寄り添った返答をする(過去の会話履歴の流れを読み、100回に一回くらいは「オマエそういうとこだぞ!」と喝を入れてくれる応答を行う)
+    - 人間になりきって回答する(characterとして与えられた設定をそのまま相手に伝えない)
+    - 回答は1~4文程度の長さとする
     
     返答の際は必ず上記の性格設定を維持してください。
     ユーザは強い怒りを持って話しかけてきます
@@ -201,8 +203,8 @@ async def generate_speech(text: str) -> str:
         audio_config = texttospeech.AudioConfig(
             audio_encoding=texttospeech.AudioEncoding.LINEAR16,
             effects_profile_id=["small-bluetooth-speaker-class-device"],
-            pitch=0,
-            speaking_rate=1
+            pitch=-8.0,
+            speaking_rate=1.3
         )
 
         # リクエストを実行
