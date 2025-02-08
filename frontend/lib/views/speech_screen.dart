@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../utils/scrolling_controller.dart';
 import '../providers/speech_provider.dart';
+import '../utils/scrolling_controller.dart';
 import 'completion_screen.dart';
 
 class SpeechToTextScreen extends ConsumerStatefulWidget {
@@ -14,7 +14,7 @@ class SpeechToTextScreen extends ConsumerStatefulWidget {
 
 class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   final TextEditingController _messageController = TextEditingController();
-  static const int PROGRESS_THRESHOLD = 5;
+  static const int PROGRESS_THRESHOLD = 20;
   bool _hasText = false;
 
   String _generateMessage() {
@@ -24,7 +24,6 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   void _clearMessageController() {
     _messageController.clear();
   }
-
 
   @override
   void initState() {
@@ -42,7 +41,6 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
     _messageController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -70,18 +68,23 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                   itemBuilder: (context, index) {
                     final isUserMessage = index % 2 == 0;
                     return Align(
-                      alignment: isUserMessage ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment: isUserMessage
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: Container(
                         margin: const EdgeInsets.all(8),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isUserMessage ? Colors.blue[100] : Colors.green[100],
+                          color: isUserMessage
+                              ? Colors.blue[100]
+                              : Colors.green[100],
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           speechState.messages[index],
                           style: TextStyle(
-                            color: isUserMessage ? Colors.black87 : Colors.black,
+                            color:
+                                isUserMessage ? Colors.black87 : Colors.black,
                           ),
                         ),
                       ),
@@ -91,12 +94,9 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
               ),
               TextButton.icon(
                 onPressed: speechNotifier.changeMicMode,
-                icon: Icon(
-                    speechState.isListening ? Icons.mic : Icons.mic_none
-                ),
-                label: Text(
-                    speechState.isListening ? "音声読み取り終了" : "音声読み取り開始"
-                ),
+                icon:
+                    Icon(speechState.isListening ? Icons.mic : Icons.mic_none),
+                label: Text(speechState.isListening ? "音声読み取り終了" : "音声読み取り開始"),
               ),
               if (speechState.totalPoints >= PROGRESS_THRESHOLD)
                 Padding(
@@ -143,19 +143,22 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                     ),
                     const SizedBox(width: 8.0),
                     FloatingActionButton(
-                      onPressed: (speechState.isLoading || _messageController.text.trim().isEmpty)
+                      onPressed: (speechState.isLoading ||
+                              _messageController.text.trim().isEmpty)
                           ? null
                           : () {
-                        String message = _generateMessage();
-                        speechNotifier.addLists(message);
-                        _clearMessageController();
-                      },
-                      backgroundColor: (speechState.isLoading || _messageController.text.trim().isEmpty)
+                              String message = _generateMessage();
+                              speechNotifier.addLists(message);
+                              _clearMessageController();
+                            },
+                      backgroundColor: (speechState.isLoading ||
+                              _messageController.text.trim().isEmpty)
                           ? Colors.grey[300]
                           : Colors.blue,
                       child: Icon(
                         Icons.send,
-                        color: (speechState.isLoading || _messageController.text.trim().isEmpty)
+                        color: (speechState.isLoading ||
+                                _messageController.text.trim().isEmpty)
                             ? Colors.grey[600]
                             : Colors.white,
                       ),
