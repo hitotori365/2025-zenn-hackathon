@@ -40,33 +40,42 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
           onPressed: speechNotifier.resetChat,
         ),
       ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              ChatListView(),
-              TextButton.icon(
-                onPressed: speechNotifier.changeMicMode,
-                icon:
-                    Icon(speechState.isListening ? Icons.mic : Icons.mic_none),
-                label: Text(speechState.isListening ? "音声読み取り終了" : "音声読み取り開始"),
-              ),
-              if (speechState.totalPoints >= progressThreshold)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: FinishButtonView(),
-                ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFieldView(),
-              ),
-            ],
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/background.png'), // 画像ファイルのパス
+            fit: BoxFit.contain, // 画像のフィット方法
           ),
-          if (speechState.isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                ChatListView(),
+                TextButton.icon(
+                  onPressed: speechNotifier.changeMicMode,
+                  icon: Icon(
+                      speechState.isListening ? Icons.mic : Icons.mic_none),
+                  label:
+                      Text(speechState.isListening ? "音声読み取り終了" : "音声読み取り開始"),
+                ),
+                if (speechState.totalPoints >= progressThreshold)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: FinishButtonView(),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFieldView(),
+                ),
+              ],
             ),
-        ],
+            if (speechState.isLoading)
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
+          ],
+        ),
       ),
     );
   }

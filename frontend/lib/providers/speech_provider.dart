@@ -106,14 +106,14 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
 
     try {
       final apiResponse = await _apiService.sendMessage(text);
-      print('response: ${apiResponse.response}');
-      print('point: ${apiResponse.point}');
-      print('progress: ${apiResponse.progress}');
+      print('メッセージ: ${apiResponse.response}');
+      print('怒り度: ${apiResponse.point}');
+      print('進捗度: ${apiResponse.progress}');
 
       // メッセージ追加
       messages.add(apiResponse.response);
       // ポイント計算
-      final newTotalPoints = state.totalPoints + apiResponse.point;
+      final newTotalPoints = state.totalPoints + apiResponse.progress;
       print('newTotalPoints: $newTotalPoints');
       // ローディング終了
       state = state.copyWith(
