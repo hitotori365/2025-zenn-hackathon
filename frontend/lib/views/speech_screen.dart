@@ -31,6 +31,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   Widget build(BuildContext context) {
     final speechState = ref.watch(speechStateProvider);
     final speechNotifier = ref.read(speechStateProvider.notifier);
+    final Color listenButtonColor = speechState.isListening ? Colors.redAccent : Colors.lightGreenAccent;
 
     return Scaffold(
       appBar: AppBar(
@@ -55,9 +56,22 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                 TextButton.icon(
                   onPressed: speechNotifier.changeMicMode,
                   icon: Icon(
-                      speechState.isListening ? Icons.mic : Icons.mic_none),
-                  label:
-                      Text(speechState.isListening ? "音声読み取り終了" : "音声読み取り開始"),
+                    speechState.isListening ? Icons.mic : Icons.mic_none,
+                    color: listenButtonColor,
+                  ),
+                  label: Text(
+                    speechState.isListening ? "音声読み取り終了" : "音声読み取り開始",
+                    style: TextStyle(
+                      color: listenButtonColor,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    side: BorderSide(
+                      color: listenButtonColor,
+                    ),
+                  ),
                 ),
                 if (speechState.totalPoints >= progressThreshold)
                   Padding(
