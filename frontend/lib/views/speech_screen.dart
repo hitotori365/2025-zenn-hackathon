@@ -15,7 +15,7 @@ class SpeechToTextScreen extends ConsumerStatefulWidget {
 }
 
 class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
-  static const int PROGRESS_THRESHOLD = 20;
+  static const int progressThreshold = 20;
 
   @override
   void initState() {
@@ -51,7 +51,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
                     Icon(speechState.isListening ? Icons.mic : Icons.mic_none),
                 label: Text(speechState.isListening ? "音声読み取り終了" : "音声読み取り開始"),
               ),
-              if (speechState.totalPoints >= PROGRESS_THRESHOLD)
+              if (speechState.totalPoints >= progressThreshold)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: FinishButtonView(),
