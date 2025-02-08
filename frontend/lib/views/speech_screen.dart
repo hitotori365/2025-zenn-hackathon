@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/speech_provider.dart';
 import '../utils/message_controller.dart';
-import '../utils/scrolling_controller.dart';
 import 'chat_list_view.dart';
 import 'finish_button_view.dart';
 import 'text_field_view.dart';
@@ -32,9 +31,6 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   Widget build(BuildContext context) {
     final speechState = ref.watch(speechStateProvider);
     final speechNotifier = ref.read(speechStateProvider.notifier);
-    final scrollingController = ref.watch(scrollingControllerProvider.notifier);
-    final messageController = ref.read(messageControllerProvider.notifier);
-    final inputText = messageController.textEditingController.text.trim();
 
     return Scaffold(
       appBar: AppBar(
