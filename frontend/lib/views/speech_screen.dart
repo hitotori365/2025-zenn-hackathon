@@ -34,7 +34,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ワラドールトーク'),
+        title: const Text('Speech to Text'),
         leading: TextButton(
           onPressed: speechNotifier.clearLists,
           child: const Text("クリア"),
