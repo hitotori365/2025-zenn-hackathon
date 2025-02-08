@@ -6,16 +6,14 @@ import '../utils/scrolling_controller.dart';
 
 /// チャット一覧
 class ChatListView extends ConsumerWidget {
-  const ChatListView(
-    this.scrollingController, {
+  const ChatListView({
     super.key,
   });
-
-  final ScrollingController scrollingController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final speechState = ref.watch(speechStateProvider);
+    final scrollingController = ref.read(scrollingControllerProvider.notifier);
 
     return Expanded(
       child: ListView.builder(
