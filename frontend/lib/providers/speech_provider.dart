@@ -19,7 +19,11 @@ final speechStateProvider =
   final speech = ref.read(_speechProvider);
   final apiService = ref.read(apiServiceProvider);
   final scrollingController = ref.read(scrollingProvider.notifier);
-  return _SpeechStateNotifier(speech, apiService, scrollingController);
+  return _SpeechStateNotifier(
+    speech,
+    apiService,
+    scrollingController,
+  );
 });
 
 class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
@@ -132,6 +136,7 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
   }
 
   void clearLists() {
+    _apiService.clearMessageHistory();
     state = state.copyWith(
       messages: [],
       isLoading: false,
