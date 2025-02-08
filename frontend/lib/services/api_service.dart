@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
@@ -24,10 +24,11 @@ class ApiService {
   // コンストラクタでの初期化
   ApiService() {
     // .envファイルから読み込むか、ビルド時の環境変数から読み込む
-    _token = dotenv.env['API_TOKEN'] ?? const String.fromEnvironment(
-      'API_TOKEN',
-      defaultValue: '',
-    );
+    _token = dotenv.env['API_TOKEN'] ??
+        const String.fromEnvironment(
+          'API_TOKEN',
+          defaultValue: '',
+        );
 
     if (_token.isEmpty) {
       throw Exception('API_TOKEN is not set');

@@ -1,5 +1,4 @@
-# simple_speech_to_text
-speech-to-textを使用したアプリ
+# ワラドール・トーク
 
 ```
 # 環境変数の設定
