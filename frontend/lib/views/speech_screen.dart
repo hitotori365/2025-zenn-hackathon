@@ -125,10 +125,8 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
             ],
           ),
           if (speechState.isLoading)
-            Container(
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+            const Center(
+              child: CircularProgressIndicator(),
             ),
         ],
       ),
