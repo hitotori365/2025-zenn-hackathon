@@ -1,10 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'dart:convert';
-import 'package:just_audio/just_audio.dart';
 import 'dart:html' as html;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
 import '../services/api_service.dart';
+import '../utils/scrolling_controller.dart';
 
 final _speechProvider = Provider<stt.SpeechToText>((_) {
   return stt.SpeechToText();
@@ -16,15 +18,19 @@ final speechStateProvider =
     StateNotifierProvider<_SpeechStateNotifier, _SpeechState>((ref) {
   final speech = ref.read(_speechProvider);
   final apiService = ref.read(apiServiceProvider);
-  return _SpeechStateNotifier(speech, apiService);
+  final scrollingController = ref.read(scrollingControllerProvider.notifier);
+  return _SpeechStateNotifier(speech, apiService, scrollingController);
 });
 
 class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
   final stt.SpeechToText _speech;
   final ApiService _apiService;
+  final ScrollingController _scrollingController;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  _SpeechStateNotifier(this._speech, this._apiService) : super(_SpeechState());
+  _SpeechStateNotifier(
+      this._speech, this._apiService, this._scrollingController)
+      : super(_SpeechState());
 
   void changeMicMode() async {
     bool hasInitialized = await _initialize();
@@ -67,22 +73,22 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
     try {
       // base64をデコード
       final bytes = base64Decode(base64Audio);
-      
+
       // Web用の音声再生処理
       final blob = html.Blob([bytes], 'audio/wav');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // AudioPlayerで再生
       await _audioPlayer.setUrl(url);
       await _audioPlayer.play();
-      
+
       // 使用後にURLを解放
       html.Url.revokeObjectUrl(url);
     } catch (e) {
       print('Error playing audio: $e');
     }
   }
-  
+
   Future<void> addLists(String text) async {
     List<String> messages = state.messages;
     messages.add(text);
@@ -91,6 +97,8 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
       messages: messages,
       isLoading: true,
     );
+    // 下部までスクロール
+      _scrollingController.scrollToBottom();
 
     try {
       final apiResponse = await _apiService.sendMessage(text);
@@ -98,7 +106,9 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
       print('point: ${apiResponse.point}');
       print('progress: ${apiResponse.progress}');
 
+      // メッセージ追加
       messages.add(apiResponse.response);
+      // ポイント計算
       final newTotalPoints = state.totalPoints + apiResponse.point;
       print('newTotalPoints: $newTotalPoints');
       // ローディング終了
@@ -107,6 +117,10 @@ class _SpeechStateNotifier extends StateNotifier<_SpeechState> {
         isLoading: false,
         totalPoints: newTotalPoints,
       );
+      // 下部までスクロール
+      _scrollingController.scrollToBottom();
+
+      // オーディオ再生
       if (apiResponse.audio.isNotEmpty) {
         await playAudio(apiResponse.audio);
       }

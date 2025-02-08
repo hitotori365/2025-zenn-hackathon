@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../utils/scrolling_controller.dart';
 import '../providers/speech_provider.dart';
 import 'completion_screen.dart';
 
@@ -46,6 +48,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
   Widget build(BuildContext context) {
     final speechState = ref.watch(speechStateProvider);
     final speechNotifier = ref.read(speechStateProvider.notifier);
+    final scrollingController = ref.watch(scrollingControllerProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -61,6 +64,7 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
             children: [
               Expanded(
                 child: ListView.builder(
+                  controller: scrollingController.scrollController,
                   padding: const EdgeInsets.all(8.0),
                   itemCount: speechState.messages.length,
                   itemBuilder: (context, index) {
