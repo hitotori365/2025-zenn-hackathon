@@ -23,6 +23,7 @@ class TextFieldView extends ConsumerWidget {
             controller: messageController.textEditingController,
             decoration: InputDecoration(
               hintText: 'メッセージを入力',
+              filled: true,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
