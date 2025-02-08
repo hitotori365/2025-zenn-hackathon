@@ -50,6 +50,10 @@ class ChatResponse(BaseModel):
     progress: int 
     audio: str
 
+class NextActionResponse(BaseModel):
+    action: str
+    reason: str
+
 token = os.getenv("TOKEN")
 if not token:
     raise RuntimeError("TOKEN environment variable is not set")
@@ -285,6 +289,66 @@ async def chat(request: ChatRequest):
     except Exception as e:
         logger.error(f"Error in chat generation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/next-action", response_model=NextActionResponse)
+async def suggest_next_action(request: ChatRequest):
+    if not model:
+        raise HTTPException(status_code=503, detail="Vertex AI model not initialized")
+    
+    try:
+        # 会話履歴を分析するためのプロンプトを作成
+        analysis_prompt = """
+        以下の会話履歴を分析し、ユーザーが次に取るべき具体的なアクションを提案してください。
+        提案は以下の形式で返してください：
+
+        アクション：[具体的な行動]
+        理由：[そのアクションを提案する理由]
+
+        会話履歴：
+        """
+        
+        # 会話履歴をフォーマット
+        conversation = "\n".join([
+            f"{'ユーザー' if msg.role == 'user' else 'アシスタント'}: {msg.content}" 
+            for msg in request.messages
+        ])
+        
+        # 次のアクションを生成
+        response = model.generate_content(
+            analysis_prompt + conversation,
+            generation_config={
+                "temperature": request.temperature,
+                "max_output_tokens": 1024,
+            },
+        )
+        
+        # レスポンスをパースして構造化
+        response_text = response.text
+        action_parts = response_text.split('\n')
+        
+        action = ""
+        reason = ""
+        
+        for part in action_parts:
+            if part.startswith("アクション："):
+                action = part.replace("アクション：", "").strip()
+            elif part.startswith("理由："):
+                reason = part.replace("理由：", "").strip()
+        
+        if not action or not reason:
+            # デフォルトの応答を設定
+            action = "状況の整理と冷静な分析"
+            reason = "現状をより明確に把握するため"
+        
+        return NextActionResponse(
+            action=action,
+            reason=reason
+        )
+
+    except Exception as e:
+        logger.error(f"Error in next action suggestion: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8080))
