@@ -34,10 +34,10 @@ class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Speech to Text'),
-        leading: TextButton(
+        title: const Text('ワラドール・トーク'),
+        leading: IconButton(
+          icon: const Icon(Icons.delete),
           onPressed: speechNotifier.clearLists,
-          child: const Text("クリア"),
         ),
       ),
       body: Stack(
