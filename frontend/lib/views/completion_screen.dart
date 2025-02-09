@@ -25,7 +25,7 @@ class CompletionScreen extends ConsumerWidget {
                     child: Column(
                       children: [
                         Text(
-                          '次のステップ: ${nextActionState.action}',
+                          '次のステップ\n\n ${nextActionState.action}',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
