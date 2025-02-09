@@ -12,8 +12,6 @@ final _speechProvider = Provider<stt.SpeechToText>((_) {
   return stt.SpeechToText();
 });
 
-final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
-
 final speechStateProvider =
     StateNotifierProvider<_SpeechStateNotifier, _SpeechState>((ref) {
   final speech = ref.read(_speechProvider);
@@ -172,7 +170,7 @@ class _SpeechState {
   }) {
     return _SpeechState(
       isListening: isListening ?? this.isListening,
-      isLoading: isLoading ?? this.isLoading, // 追加
+      isLoading: isLoading ?? this.isLoading,
       text: text ?? this.text,
       confidence: confidence ?? this.confidence,
       messages: messages ?? this.messages,

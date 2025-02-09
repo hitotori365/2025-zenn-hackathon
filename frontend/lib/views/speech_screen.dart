@@ -15,7 +15,7 @@ class SpeechToTextScreen extends ConsumerStatefulWidget {
 }
 
 class _SpeechToTextScreenState extends ConsumerState<SpeechToTextScreen> {
-  static const int progressThreshold = 20;
+  static const int progressThreshold = 1;
 
   @override
   void initState() {
